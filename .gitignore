@@ -1,0 +1,4 @@
+db-daemon
+*.o
+
+*.db
