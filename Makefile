@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=
-OBJS=database.o utils.o
+OBJS=database.o utils.o sqlite.o
 BIN=db-daemon
 
 db-daemon: $(OBJS)
@@ -11,6 +11,9 @@ utils.o: utils.h
 
 database.o: database.h
 	$(CC) $(CFLAGS) -c -o database.o database.c
+
+sqlite.o: sqlite.h
+	$(CC) $(CFLAGS) -c -o sqlite.o sqlite.c
 
 clean:
 	rm $(OBJS) $(BIN)

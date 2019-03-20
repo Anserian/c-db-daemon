@@ -14,16 +14,82 @@ void* free_all(size_t nmemb, ...)
     return NULL;
 }
 
+list_node_t* append_list_node(void* node)
+{
+    if ((list_node_t*) node == NULL)
+    {
+        return NULL;
+    }
+
+    list_node_t* list_node = (list_node_t*) node;
+
+    while(list_node != NULL)
+    {
+        list_node = (list_node_t*) get_next_list_node(list_node);
+    }
+
+    list_node->next = (list_node_t*) malloc(sizeof(list_node_t));
+
+    if (list_node->next == NULL)
+    {
+        return NULL;
+    }
+
+    return list_node->next;
+}
+
+list_node_t* find_node(list_node_t* start_node, void* condition, bool (*condition_function) (void*, void*))
+{
+    list_node_t* index_node = start_node;
+
+    while (index_node != NULL)
+    {
+        if (condition_function(index_node, condition))
+        {
+            return index_node;
+        }
+
+        index_node = (list_node_t*) get_next_list_node(index_node);
+    }
+
+    return NULL;
+}
+
 void* get_next_list_node(void* node)
 {
     list_node_t* list_node = (list_node_t*) node;
 
-    return (void*) list_node->next;
+    if (list_node->next != NULL)
+    {
+        return (void*) list_node->next;
+    }
+
+    return NULL;
 }
 
-char* build_list(void* item, char* separator, char*(*build_list_item)(void*), void*(*get_next)(void*))
+void* for_each_list_node(void* first_node, void* (*operation_function) (void*))
+{
+    list_node_t* index_node = first_node;
+
+    while (index_node != NULL)
+    {
+        operation_function(index_node);
+
+        index_node = get_next_list_node(index_node);
+    }
+
+    return NULL;
+}
+
+char* build_list(void* item, char* separator, char* (*build_list_item) (void*), void* (*get_next) (void*))
 {
     char* list = (char*) malloc(sizeof(char));
+
+    if (list == NULL)
+    {
+        return NULL;
+    }
+
     *list = '\0';
 
     while (item != NULL)
@@ -32,6 +98,11 @@ char* build_list(void* item, char* separator, char*(*build_list_item)(void*), vo
 
         list = realloc(list, sizeof(char) * (strlen(list) + strlen(item_string)));
 
+        if (list == NULL)
+        {
+            return NULL;
+        }
+
         strcat(list, item_string);
 
         item = get_next(item);
@@ -39,6 +110,11 @@ char* build_list(void* item, char* separator, char*(*build_list_item)(void*), vo
         if (item != NULL)
         {
             list = realloc(list, sizeof(char) * (strlen(list) + strlen(separator)));
+
+            if (list == NULL)
+            {
+                return NULL;
+            }
 
             strcat(list, separator);
         }
@@ -56,23 +132,25 @@ char* combine_strings(size_t nmemb, ...)
     va_start(strings, nmemb);
 
     for (int i = 0; i < nmemb; i++) {
-        const char *item = va_arg(strings, char*);
+        const char* item = va_arg(strings, char*);
         total_length += strlen(item);
     }
 
     va_end(strings);
 
-    char *combined_string = malloc(total_length + 1);
+    char* combined_string = malloc(total_length + 1);
 
     if (combined_string == NULL)
+    {
         return NULL;
+    }
 
-    char *destination = combined_string;
+    char* destination = combined_string;
 
     va_start(strings, nmemb);
 
     for (int i = 0; i < nmemb; i++) {
-        const char *source = va_arg(strings, char*);
+        const char* source = va_arg(strings, char*);
 
         strcat(combined_string, source);
     }
@@ -85,6 +163,11 @@ char* combine_strings(size_t nmemb, ...)
 char* space_separate(char* first_item, char* second_item)
 {
     char* separated_string = (char*) malloc(sizeof(char) * (strlen(first_item) + strlen(second_item) + 2));
+
+    if (separated_string == NULL)
+    {
+        return NULL;
+    }
 
     strcpy(separated_string, first_item);
 

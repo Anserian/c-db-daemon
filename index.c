@@ -1,33 +1,20 @@
 #include "database.h"
+#include "sqlite.h"
 
 int main()
 {
-    sqlite3* database;
-
     database_config_t config = {
+        .driver = "sqlite",
         .path = "./test.db"
     };
 
-    list_node_t* field_list = (list_node_t*) malloc(sizeof(list_node_t));
-    field_list->item = (database_field_t*) malloc(sizeof(database_field_t));
+    database_instance_t* instance = create_sqlite_instance(config);
+    instance->initialize_database(instance);
 
-    database_field_t* field = field_list->item;
+    database_table_t* table = add_table(instance, "testtable");
+    database_field_t* field = add_table_field(table, "testfield", "TEXT");
 
-    field->name = "testcolumn";
-    field->data_type = "CHAR(50)";
-    field_list->next = NULL;
+    prepare_create_table(instance, table);
 
-    database_table_t test_table = {
-        .name = "testtable",
-        .fields = field_list
-    };
-
-    initialize_database(&database, config);
-
-    prepare_create_table(database, test_table);
-
-    sqlite3_close(database);
-    
-    free(field_list->item);
-    free(field_list);
+    instance->async_execute_sql(instance, instance->prepared_statement);
 };

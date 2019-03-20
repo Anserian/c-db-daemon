@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <sqlite3.h>
 
 #include "utils.h"
 
@@ -16,15 +15,20 @@
 #define FIELD_SEPARATOR ","
 #define TERMINATE_SQL ";\0"
 
+typedef struct ListNode field_node_t;
+typedef struct ListNode table_node_t;
+
 typedef struct DatabaseConfig
 {
+    char* driver;
+    bool verbose;
     char* path;
 } database_config_t;
 
 typedef struct DatabaseTable
 {
     char* name;
-    struct ListNode* fields;
+    field_node_t* fields;
 } database_table_t;
 
 typedef struct DatabaseField
@@ -35,18 +39,27 @@ typedef struct DatabaseField
 
 typedef struct DatabaseInstance
 {
-    sqlite3* connection;
-    bool verbose;
+    struct DatabaseConfig config;
+    void* connection;
+    table_node_t* tables;
+    char* prepared_statement;
+    void* (*initialize_database) (struct DatabaseInstance*);
+    void* (*show_database_error) (struct DatabaseInstance*, char*);
+    void* (*async_execute_sql) (struct DatabaseInstance*, char*);
 } database_instance_t;
 
-void show_database_error(sqlite3*, char*);
+database_table_t* add_table(database_instance_t*, char*);
 
-int default_sqlite_callback(void*, int, char**, char**);
+bool match_table_node(void*, void*);
 
-void* async_execute_sql(sqlite3*, char*);
+database_table_t* get_table_from_node(void*);
 
-bool initialize_database(sqlite3**, database_config_t);
+database_table_t* find_table(database_instance_t*, char*);
 
-char* prepare_create_table(sqlite3*, database_table_t);
+database_field_t* add_table_field(database_table_t*, char*, char*);
+
+database_field_t* get_field_from_node(void*);
+
+void* prepare_create_table(database_instance_t*, database_table_t*);
 
 #endif

@@ -1,69 +1,121 @@
 #include "database.h"
 
-void show_database_error(sqlite3* database, char* error_message)
+// OBJECT MANAGEMENT
+
+database_table_t* add_table(database_instance_t* instance, char* name)
 {
-    fprintf(stderr, DATABASE_ERROR, error_message, sqlite3_errmsg(database));
-}
+    table_node_t* new_table_node = append_list_node(instance->tables);
 
-int default_sqlite_callback(void *null_arg, int argc, char **argv, char **col_name) {
-    int i;
-    
-    for(i = 0; i<argc; i++) {
-        printf("%s = %s\n", col_name[i], argv[i] ? argv[i] : "NULL");
-    }
-    
-    printf("\n");
-    return 0;
-}
-
-bool initialize_database(sqlite3** database, database_config_t config)
-{
-    int return_code = sqlite3_open(config.path, database);
-
-    if (return_code)
+    if (new_table_node == NULL)
     {
-        show_database_error(*database, "Couldn't open database");
-
-        return false;
+        new_table_node = (list_node_t*) malloc(sizeof(list_node_t));
+        instance->tables = new_table_node;
+        instance->tables->next = NULL;
     }
 
-    return true;
+    new_table_node->item = (database_table_t*) malloc(sizeof(database_table_t));
+
+    if (new_table_node->item == NULL)
+    {
+        return NULL;
+    }
+
+    database_table_t* table = new_table_node->item;
+
+    table->name = name;
+    table->fields = NULL;
+
+    return table;
 }
 
-void* async_execute_sql(sqlite3* database, char* sql_statement)
+bool match_table_node(void* node, void* name)
 {
-    char* error_message = 0;
-
-    int return_code = sqlite3_exec(database, sql_statement, default_sqlite_callback, 0, &error_message);
-
-    if (return_code != SQLITE_OK)
+    if (get_table_from_node(node)->name == (char*) name)
     {
-        show_database_error(database, "Error executing sql");
+        return true;
     }
 
-    return NULL;
+    return false;
+}
+
+database_table_t* get_table_from_node(void* node)
+{
+    list_node_t* list_node = (list_node_t*) node; 
+
+    return (database_table_t*) list_node->item;
+}
+
+database_table_t* find_table(database_instance_t* instance, char* name)
+{
+    table_node_t* table_node = find_node(instance->tables, name, match_table_node);
+
+    return (database_table_t*) table_node->item;
+}
+
+database_field_t* add_table_field(database_table_t* table, char* name, char* data_type)
+{
+    field_node_t* new_field_node = append_list_node(table->fields);
+
+    if (new_field_node == NULL)
+    {
+        new_field_node = (list_node_t*) malloc(sizeof(list_node_t));
+        table->fields = new_field_node;
+        table->fields->next = NULL;
+    }
+
+    new_field_node->item = (database_field_t*) malloc(sizeof(database_table_t));
+
+    if (new_field_node->item == NULL)
+    {
+        return NULL;
+    }
+
+    database_field_t* field = new_field_node->item;
+
+    field->name = name;
+    field->data_type = data_type;
+
+    return field;
+}
+
+database_field_t* get_field_from_node(void* node)
+{
+    list_node_t* list_node = (list_node_t*) node;
+
+    return (database_field_t*) list_node->item;
 }
 
 char* build_field_init_string(void* node)
 {
-    list_node_t* list_node = (list_node_t*) node; 
-
-    database_field_t* current_field = (database_field_t*) list_node->item;
+    database_field_t* current_field = get_field_from_node(node);
 
     return space_separate(current_field->name, current_field->data_type);
 }
 
-char* prepare_create_table(sqlite3* database, database_table_t table)
+// SQL
+
+void* prepare_create_table(database_instance_t* instance, database_table_t* table)
 {
-    char* create_table = space_separate(CREATE_TABLE, table.name);
+    char* create_table = space_separate(CREATE_TABLE, table->name);
 
     char* sql_statement = combine_strings(2, create_table, START_LIST);
 
-    char* field_list = build_list((void*) table.fields, ", ", build_field_init_string, get_next_list_node);
+    char* field_list = build_list((void*) table->fields, ", ", build_field_init_string, get_next_list_node);
 
     sql_statement = combine_strings(4, sql_statement, field_list, END_LIST, TERMINATE_SQL);
 
     free_all(2, create_table, sql_statement, field_list);
 
-    return sql_statement;
+    instance->prepared_statement = sql_statement;
+
+    return NULL;
+}
+
+bool create_table(database_instance_t* instance, database_table_t* table)
+{
+    prepare_create_table(instance, table);
+
+    instance->async_execute_sql(instance, instance->prepared_statement);
+
+    return true;
 }
