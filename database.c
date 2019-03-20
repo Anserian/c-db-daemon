@@ -6,11 +6,9 @@ database_table_t* add_table(database_instance_t* instance, char* name)
 {
     table_node_t* new_table_node = append_list_node(instance->tables);
 
-    if (new_table_node == NULL)
+    if (instance->tables == NULL)
     {
-        new_table_node = (list_node_t*) malloc(sizeof(list_node_t));
         instance->tables = new_table_node;
-        instance->tables->next = NULL;
     }
 
     new_table_node->item = (database_table_t*) malloc(sizeof(database_table_t));
@@ -56,11 +54,9 @@ database_field_t* add_table_field(database_table_t* table, char* name, char* dat
 {
     field_node_t* new_field_node = append_list_node(table->fields);
 
-    if (new_field_node == NULL)
+    if (table->fields == NULL)
     {
-        new_field_node = (list_node_t*) malloc(sizeof(list_node_t));
         table->fields = new_field_node;
-        table->fields->next = NULL;
     }
 
     new_field_node->item = (database_field_t*) malloc(sizeof(database_table_t));
@@ -104,9 +100,9 @@ void* prepare_create_table(database_instance_t* instance, database_table_t* tabl
 
     sql_statement = combine_strings(4, sql_statement, field_list, END_LIST, TERMINATE_SQL);
 
-    free_all(2, create_table, sql_statement, field_list);
+    instance->prepared_statement = strdup(sql_statement);
 
-    instance->prepared_statement = sql_statement;
+    free_all(3, create_table, sql_statement, field_list, sql_statement);
 
     return NULL;
 }

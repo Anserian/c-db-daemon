@@ -9,7 +9,7 @@
 
 #define DATABASE_ERROR "Database error: %s: %s"
 
-#define CREATE_TABLE "CREATE TABLE"
+#define CREATE_TABLE "CREATE TABLE IF NOT EXISTS"
 #define START_LIST " ("
 #define END_LIST ") "
 #define FIELD_SEPARATOR ","

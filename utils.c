@@ -14,11 +14,19 @@ void* free_all(size_t nmemb, ...)
     return NULL;
 }
 
+list_node_t* initialize_list_node(list_node_t* node)
+{
+    node = (list_node_t*) malloc(sizeof(list_node_t));
+    node->next = NULL;
+
+    return node;
+}
+
 list_node_t* append_list_node(void* node)
 {
     if ((list_node_t*) node == NULL)
     {
-        return NULL;
+        return initialize_list_node((list_node_t*) node);
     }
 
     list_node_t* list_node = (list_node_t*) node;
