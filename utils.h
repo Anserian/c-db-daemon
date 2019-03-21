@@ -14,9 +14,11 @@ typedef struct ListNode
 
 void* free_all(size_t, ...);
 
-list_node_t* initialize_list_node(list_node_t*);
+void* free_all_nodes(list_node_t*);
 
-list_node_t* append_list_node(void*);
+list_node_t* initialize_list_node(list_node_t*, void* (*) (list_node_t*));
+
+list_node_t* append_list_node(void*, void* (*) (list_node_t*));
 
 list_node_t* find_node(list_node_t*, void*, bool (*) (void*, void*));
 

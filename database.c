@@ -2,20 +2,38 @@
 
 // OBJECT MANAGEMENT
 
+void* free_instance(database_instance_t* instance)
+{
+    for_each_list_node(instance->tables, free_table);
+
+    free_all_nodes(instance->tables);
+
+    return NULL;
+}
+
+void* free_table(void* node)
+{
+    table_node_t* table = (table_node_t*) node;
+
+    database_table_t* table_item = (database_table_t*) table->item;
+
+    free_all_nodes(table_item->fields);
+
+    return NULL;
+}
+
+void* initialize_table_node(table_node_t* node)
+{
+    return (database_table_t*) malloc(sizeof(database_table_t));
+}
+
 database_table_t* add_table(database_instance_t* instance, char* name)
 {
-    table_node_t* new_table_node = append_list_node(instance->tables);
+    table_node_t* new_table_node = append_list_node(instance->tables, initialize_table_node);
 
     if (instance->tables == NULL)
     {
         instance->tables = new_table_node;
-    }
-
-    new_table_node->item = (database_table_t*) malloc(sizeof(database_table_t));
-
-    if (new_table_node->item == NULL)
-    {
-        return NULL;
     }
 
     database_table_t* table = new_table_node->item;
@@ -50,9 +68,14 @@ database_table_t* find_table(database_instance_t* instance, char* name)
     return (database_table_t*) table_node->item;
 }
 
+void* initialize_field_node(table_node_t* node)
+{
+    return (database_field_t*) malloc(sizeof(database_field_t));
+}
+
 database_field_t* add_table_field(database_table_t* table, char* name, char* data_type)
 {
-    field_node_t* new_field_node = append_list_node(table->fields);
+    field_node_t* new_field_node = append_list_node(table->fields, initialize_field_node);
 
     if (table->fields == NULL)
     {
@@ -92,17 +115,13 @@ char* build_field_init_string(void* node)
 
 void* prepare_create_table(database_instance_t* instance, database_table_t* table)
 {
-    char* create_table = space_separate(CREATE_TABLE, table->name);
-
-    char* sql_statement = combine_strings(2, create_table, START_LIST);
-
     char* field_list = build_list((void*) table->fields, ", ", build_field_init_string, get_next_list_node);
 
-    sql_statement = combine_strings(4, sql_statement, field_list, END_LIST, TERMINATE_SQL);
+    char* sql_statement = combine_strings(6, CREATE_TABLE, table->name, START_LIST, field_list, END_LIST, TERMINATE_SQL);
 
     instance->prepared_statement = strdup(sql_statement);
 
-    free_all(3, create_table, sql_statement, field_list, sql_statement);
+    free_all(2, sql_statement, field_list);
 
     return NULL;
 }

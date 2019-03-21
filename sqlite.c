@@ -13,6 +13,7 @@ database_instance_t* create_sqlite_instance(database_config_t config)
     instance->initialize_database = initialize_database_sqlite;
     instance->show_database_error = show_sqlite_error;
     instance->async_execute_sql = async_execute_sql_sqlite;
+    instance->execute_sql = execute_sql_sqlite;
 
     return instance;
 }
@@ -53,7 +54,7 @@ void* initialize_database_sqlite(database_instance_t* instance)
     return NULL;
 }
 
-void* async_execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
+bool execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
 {
     char* error_message = 0;
 
@@ -63,6 +64,13 @@ void* async_execute_sql_sqlite(database_instance_t* instance, char* sql_statemen
     {
         instance->show_database_error(instance, "Error executing sql");
     }
+
+    return return_code == 0;
+}
+
+void* async_execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
+{
+    execute_sql_sqlite(instance, sql_statement);
 
     return NULL;
 }

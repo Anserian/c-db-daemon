@@ -12,4 +12,6 @@ void* show_sqlite_error(database_instance_t*, char*);
 
 void* initialize_database_sqlite(database_instance_t*);
 
+bool execute_sql_sqlite(database_instance_t*, char*);
+
 void* async_execute_sql_sqlite(database_instance_t*, char*);

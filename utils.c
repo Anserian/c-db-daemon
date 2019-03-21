@@ -14,19 +14,39 @@ void* free_all(size_t nmemb, ...)
     return NULL;
 }
 
-list_node_t* initialize_list_node(list_node_t* node)
+void* free_all_nodes(list_node_t* first_node)
+{
+    list_node_t* index_node = first_node;
+    list_node_t* previous_node = first_node;
+
+    while (index_node != NULL)
+    {
+        index_node = index_node->next;
+
+        free(previous_node->item);
+        free(previous_node);
+
+        previous_node = index_node;
+    }
+
+    return NULL;
+}
+
+list_node_t* initialize_list_node(list_node_t* node, void* (*item_initializer) (list_node_t*))
 {
     node = (list_node_t*) malloc(sizeof(list_node_t));
+    node->item = item_initializer(node);
+
     node->next = NULL;
 
     return node;
 }
 
-list_node_t* append_list_node(void* node)
+list_node_t* append_list_node(void* node, void* (*item_initializer) (list_node_t*))
 {
     if ((list_node_t*) node == NULL)
     {
-        return initialize_list_node((list_node_t*) node);
+        return initialize_list_node(node, item_initializer);
     }
 
     list_node_t* list_node = (list_node_t*) node;
@@ -36,14 +56,14 @@ list_node_t* append_list_node(void* node)
         list_node = (list_node_t*) get_next_list_node(list_node);
     }
 
-    list_node->next = (list_node_t*) malloc(sizeof(list_node_t));
+    initialize_list_node(node, item_initializer);
 
-    if (list_node->next == NULL)
+    if (list_node->next != NULL)
     {
-        return NULL;
+        return list_node->next;
     }
 
-    return list_node->next;
+    return NULL;
 }
 
 list_node_t* find_node(list_node_t* start_node, void* condition, bool (*condition_function) (void*, void*))

@@ -1,11 +1,14 @@
 #include "database.h"
 #include "sqlite.h"
+#include "server.h"
 
 int main()
 {
+    /*
     database_config_t config = {
         .driver = "sqlite",
-        .path = "./test.db"
+        .path = "./test.db",
+        .verbose = true
     };
 
     database_instance_t* instance = create_sqlite_instance(config);
@@ -17,4 +20,9 @@ int main()
     prepare_create_table(instance, table);
 
     instance->async_execute_sql(instance, instance->prepared_statement);
+
+    free_instance(instance);
+    */
+
+   listen_and_serve(">tcp://127.0.0.1:5560");
 };

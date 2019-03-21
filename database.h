@@ -9,7 +9,7 @@
 
 #define DATABASE_ERROR "Database error: %s: %s"
 
-#define CREATE_TABLE "CREATE TABLE IF NOT EXISTS"
+#define CREATE_TABLE "CREATE TABLE IF NOT EXISTS "
 #define START_LIST " ("
 #define END_LIST ") "
 #define FIELD_SEPARATOR ","
@@ -46,7 +46,12 @@ typedef struct DatabaseInstance
     void* (*initialize_database) (struct DatabaseInstance*);
     void* (*show_database_error) (struct DatabaseInstance*, char*);
     void* (*async_execute_sql) (struct DatabaseInstance*, char*);
+    bool (*execute_sql) (struct DatabaseInstance*, char*);
 } database_instance_t;
+
+void* free_instance(database_instance_t*);
+
+void* free_table(void*);
 
 database_table_t* add_table(database_instance_t*, char*);
 
