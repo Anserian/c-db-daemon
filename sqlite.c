@@ -18,18 +18,20 @@ database_instance_t* create_sqlite_instance(database_config_t config)
     return instance;
 }
 
-void show_sqlite_error(database_instance_t* instance, char* error_message)
+void* show_sqlite_error(database_instance_t* instance, char* error_message)
 {
     fprintf(stderr, DATABASE_ERROR, error_message, sqlite3_errmsg(instance->connection));
+
+    return NULL;
 }
 
 int default_sqlite_callback(void *null_arg, int argc, char **argv, char **col_name) {
     int i;
-    
+
     for(i = 0; i<argc; i++) {
         printf("%s = %s\n", col_name[i], argv[i] ? argv[i] : "NULL");
     }
-    
+
     printf("\n");
     return 0;
 }
