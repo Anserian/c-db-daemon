@@ -4,7 +4,6 @@
 
 int main()
 {
-    /*
     database_config_t config = {
         .driver = "sqlite",
         .path = "./test.db",
@@ -22,7 +21,6 @@ int main()
     instance->async_execute_sql(instance, instance->prepared_statement);
 
     free_instance(instance);
-    */
 
-   listen_and_serve(">tcp://127.0.0.1:5560");
+   //isten_and_serve("tcp://127.0.0.1:5560");
 };

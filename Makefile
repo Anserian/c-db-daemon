@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=
-OBJS=database.o utils.o sqlite.o server.o
+OBJS=database.o utils.o sqlite.o server.o jsonapi.o cjson.o
 BIN=db-daemon
 
 db-daemon: $(OBJS)
@@ -17,6 +17,12 @@ sqlite.o: sqlite.h
 
 server.o: server.h
 	$(CC) $(CFLAGS) -c -o server.o server.c
+
+jsonapi.o: jsonapi.h
+	$(CC) $(CFLAGS) -c -o jsonapi.o jsonapi.c
+
+cjson.o: include/cJSON.h
+	$(CC) $(CFLAGS) -c -o cjson.o include/cJSON.c
 
 clean:
 	rm $(OBJS) $(BIN)
