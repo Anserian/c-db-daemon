@@ -72,8 +72,7 @@ void extract_table_list_from_json(const cJSON *tables_object, database_instance_
 
 database_instance_t *parse_initialization_request(const char *json_string)
 {
-    database_instance_t *instance = (database_instance_t *)malloc(sizeof(database_instance_t));
-    instance->config;
+    database_config_t config;
 
     const cJSON *database_path = NULL;
     const cJSON *database_driver = NULL;
@@ -92,8 +91,11 @@ database_instance_t *parse_initialization_request(const char *json_string)
         }
     }
 
-    instance->config.path = extract_string_from_json(initialization_request, &database_path, "path");
-    instance->config.driver = extract_string_from_json(initialization_request, &database_driver, "path");
+    config.path = extract_string_from_json(initialization_request, &database_path, "path");
+    config.driver = extract_string_from_json(initialization_request, &database_driver, "path");
+
+    database_instance_t *instance = create_sqlite_instance(config);
+    instance->initialize_database(instance);
 
     extract_object_from_json(initialization_request, &tables, "tables");
     extract_table_list_from_json(tables, instance);
