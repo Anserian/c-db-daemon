@@ -1,4 +1,5 @@
 #include "server.h"
+#include "jsonapi.h"
 
 int listen_and_serve(char *endpoint)
 {

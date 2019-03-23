@@ -1,10 +1,10 @@
 #include "sqlite.h"
 
-database_instance_t* create_sqlite_instance(database_config_t config)
+database_instance_t *create_sqlite_instance(database_config_t config)
 {
-    database_instance_t* instance = (database_instance_t*) malloc(sizeof(database_instance_t));
+    database_instance_t *instance = (database_instance_t *)malloc(sizeof(database_instance_t));
 
-    instance->connection = malloc(sizeof(sqlite3*));
+    instance->connection = malloc(sizeof(sqlite3 *));
 
     instance->config = config;
 
@@ -18,17 +18,19 @@ database_instance_t* create_sqlite_instance(database_config_t config)
     return instance;
 }
 
-void* show_sqlite_error(database_instance_t* instance, char* error_message)
+void *show_sqlite_error(database_instance_t *instance, char *error_message)
 {
     fprintf(stderr, DATABASE_ERROR, error_message, sqlite3_errmsg(instance->connection));
 
     return NULL;
 }
 
-int default_sqlite_callback(void *null_arg, int argc, char **argv, char **col_name) {
+int default_sqlite_callback(void *null_arg, int argc, char **argv, char **col_name)
+{
     int i;
 
-    for(i = 0; i<argc; i++) {
+    for (i = 0; i < argc; i++)
+    {
         printf("%s = %s\n", col_name[i], argv[i] ? argv[i] : "NULL");
     }
 
@@ -36,9 +38,9 @@ int default_sqlite_callback(void *null_arg, int argc, char **argv, char **col_na
     return 0;
 }
 
-void* initialize_database_sqlite(database_instance_t* instance)
+void *initialize_database_sqlite(database_instance_t *instance)
 {
-    sqlite3* db;
+    sqlite3 *db;
 
     int return_code = sqlite3_open(instance->config.path, &db);
 
@@ -54,9 +56,9 @@ void* initialize_database_sqlite(database_instance_t* instance)
     return NULL;
 }
 
-bool execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
+bool execute_sql_sqlite(database_instance_t *instance, char *sql_statement)
 {
-    char* error_message = 0;
+    char *error_message = 0;
 
     int return_code = sqlite3_exec(instance->connection, sql_statement, default_sqlite_callback, 0, &error_message);
 
@@ -68,7 +70,7 @@ bool execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
     return return_code == 0;
 }
 
-void* async_execute_sql_sqlite(database_instance_t* instance, char* sql_statement)
+void *async_execute_sql_sqlite(database_instance_t *instance, char *sql_statement)
 {
     execute_sql_sqlite(instance, sql_statement);
 
