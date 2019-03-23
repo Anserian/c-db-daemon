@@ -82,13 +82,6 @@ database_field_t *add_table_field(database_table_t *table, char *name, char *dat
         table->fields = new_field_node;
     }
 
-    new_field_node->item = (database_field_t *)malloc(sizeof(database_table_t));
-
-    if (new_field_node->item == NULL)
-    {
-        return NULL;
-    }
-
     database_field_t *field = new_field_node->item;
 
     field->name = name;

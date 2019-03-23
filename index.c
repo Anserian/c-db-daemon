@@ -27,11 +27,15 @@ int main()
 
     //isten_and_serve("tcp://127.0.0.1:5560");
     database_instance_t *instance = parse_initialization_request("{ \"path\": \"./test.db\", \"driver\": \"sqlite\", \"tables\": \
-        {  \"name\": \"testtable\", \"fields\": { \"name\": \"testfield\", \"data_type\": \"TEXT\" } }}");
+        [{  \"name\": \"testtable\", \"fields\": [{ \"name\": \"testfield\", \"data_type\": \"TEXT\" }] }] }");
 
     puts(instance->config.path);
 
     database_table_t *test_table = (database_table_t *)instance->tables->item;
 
     puts(test_table->name);
+
+    database_field_t *table_field = (database_field_t *)test_table->fields->item;
+
+    puts(table_field->data_type);
 };

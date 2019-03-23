@@ -41,34 +41,32 @@ const cJSON *extract_object_from_json(cJSON *parent_object, const cJSON **target
 
 void extract_field_list_from_json(const cJSON *fields_object, database_table_t *table)
 {
-    cJSON *current_field_object = fields_object;
+    cJSON *current_field_object = NULL;
 
-    while (current_field_object != NULL)
+    cJSON_ArrayForEach(current_field_object, fields_object)
     {
         const cJSON *field_name = NULL;
         const cJSON *data_type = NULL;
 
         database_field_t *current_field = add_table_field(table, extract_string_from_json(current_field_object, &field_name, "name"),
                                                           extract_string_from_json(current_field_object, &data_type, "data_type"));
-
-        current_field_object = current_field_object->next;
     }
 }
 
 void extract_table_list_from_json(const cJSON *tables_object, database_instance_t *instance)
 {
-    cJSON *current_table_object = tables_object;
+    cJSON *current_table_object = NULL;
 
-    while (current_table_object != NULL)
+    cJSON_ArrayForEach(current_table_object, tables_object)
     {
         const cJSON *table_name = NULL;
         const cJSON *fields = NULL;
 
         database_table_t *current_table = add_table(instance, extract_string_from_json(current_table_object, &table_name, "name"));
 
-        //extract_field_list_from_json(extract_object_from_json(current_table_object, &fields, "fields"), current_table);
+        extract_object_from_json(current_table_object, &fields, "fields");
 
-        current_table_object = current_table_object->next;
+        extract_field_list_from_json(fields, current_table);
     }
 }
 
